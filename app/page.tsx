@@ -13,7 +13,7 @@ export default function Home() {
     <div className="min-h-screen">
       <Header />
       <Hero />
-      <FeaturedProperties />
+      {/* <FeaturedProperties /> */}
       <Features />
       <FAQ />
       <Footer />

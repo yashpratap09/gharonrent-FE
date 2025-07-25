@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +24,8 @@ import Link from "next/link";
 
 interface HostDashboardProps {
   user: any;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 // Mock data for host
@@ -70,9 +71,7 @@ const mockHostStats = {
   occupancyRate: 85
 };
 
-export const HostDashboard = ({ user }: HostDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
-
+export const HostDashboard = ({ user, activeTab, onTabChange }: HostDashboardProps) => {
   return (
     <div className="space-y-8">
       {/* Quick Stats */}
@@ -139,7 +138,7 @@ export const HostDashboard = ({ user }: HostDashboardProps) => {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="properties">My Properties</TabsTrigger>
@@ -157,7 +156,7 @@ export const HostDashboard = ({ user }: HostDashboardProps) => {
                   <Home className="h-5 w-5 text-blue-500" />
                   Recent Properties
                 </CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab("properties")}>
+                <Button variant="ghost" size="sm" onClick={() => onTabChange("properties")}>
                   View All
                 </Button>
               </CardHeader>
@@ -213,7 +212,7 @@ export const HostDashboard = ({ user }: HostDashboardProps) => {
                     <span className="text-sm text-muted-foreground">Average Rating</span>
                     <span className="font-semibold flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      {user.rating}
+                      4.8
                     </span>
                   </div>
                 </div>
@@ -234,7 +233,7 @@ export const HostDashboard = ({ user }: HostDashboardProps) => {
                     Add Property
                   </Link>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2">
+                <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => onTabChange("inquiries")}>
                   <MessageSquare className="h-6 w-6" />
                   View Inquiries
                 </Button>

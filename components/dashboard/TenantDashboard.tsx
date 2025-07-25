@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +21,8 @@ import Link from "next/link";
 
 interface TenantDashboardProps {
   user: any;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 // Mock data
@@ -86,9 +87,7 @@ const mockStats = {
   activeSearches: 3
 };
 
-export const TenantDashboard = ({ user }: TenantDashboardProps) => {
-  const [activeTab, setActiveTab] = useState("overview");
-
+export const TenantDashboard = ({ user, activeTab, onTabChange }: TenantDashboardProps) => {
   return (
     <div className="space-y-8">
       {/* Quick Stats */}
@@ -135,7 +134,7 @@ export const TenantDashboard = ({ user }: TenantDashboardProps) => {
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={onTabChange} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
@@ -153,7 +152,7 @@ export const TenantDashboard = ({ user }: TenantDashboardProps) => {
                   <Heart className="h-5 w-5 text-red-500" />
                   Recent Wishlist
                 </CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab("wishlist")}>
+                <Button variant="ghost" size="sm" onClick={() => onTabChange("wishlist")}>
                   View All
                 </Button>
               </CardHeader>
@@ -187,7 +186,7 @@ export const TenantDashboard = ({ user }: TenantDashboardProps) => {
                   <Eye className="h-5 w-5 text-blue-500" />
                   Recently Viewed
                 </CardTitle>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab("viewed")}>
+                <Button variant="ghost" size="sm" onClick={() => onTabChange("viewed")}>
                   View All
                 </Button>
               </CardHeader>
@@ -228,7 +227,7 @@ export const TenantDashboard = ({ user }: TenantDashboardProps) => {
                     Search Properties
                   </Link>
                 </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2">
+                <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => onTabChange("wishlist")}>
                   <Heart className="h-6 w-6" />
                   View Wishlist
                 </Button>
@@ -236,7 +235,7 @@ export const TenantDashboard = ({ user }: TenantDashboardProps) => {
                   <Calendar className="h-6 w-6" />
                   Schedule Visit
                 </Button>
-                <Button variant="outline" className="h-20 flex-col gap-2">
+                <Button variant="outline" className="h-20 flex-col gap-2" onClick={() => onTabChange("plan")}>
                   <Package className="h-6 w-6" />
                   Upgrade Plan
                 </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TenantDashboard } from "./TenantDashboard";
@@ -16,22 +16,41 @@ import {
   Star
 } from "lucide-react";
 import Link from "next/link";
-
-// Mock user data - replace with actual user context/API
-const mockUser = {
-  id: "1",
-  name: "John Doe",
-  email: "john.doe@example.com",
-  avatar: "",
-  role: "tenant", // Change to "host" to see host dashboard
-  verified: true,
-  rating: 4.8,
-  totalReviews: 24,
-  plan: "Professional"
-};
+import { useSearchParams, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export const UserDashboard = () => {
-  const [user] = useState(mockUser);
+  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Get tab from URL params on mount and when params change
+  useEffect(() => {
+    const tabFromUrl = searchParams.get('tab');
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [searchParams]);
+
+  // Update URL when tab changes
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    const newUrl = newTab === "overview" ? "/dashboard" : `/dashboard?tab=${newTab}`;
+    router.push(newUrl, { scroll: false });
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <p className="text-muted-foreground">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
@@ -40,29 +59,23 @@ export const UserDashboard = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={user.avatar} />
-              <AvatarFallback className="text-lg">
-                {user.name.split(" ").map(n => n[0]).join("")}
+              <AvatarImage src="" />
+              <AvatarFallback className="text-lg uppercase">
+                {user.name?.split(" ").map(n => n[0]).join("") || 'U'}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold">
-                Welcome back, {user.name.split(" ")[0]}!
+              <h1 className="text-2xl md:text-3xl font-bold uppercase">
+                Welcome back, {user.name?.split(" ")[0] || 'User'}!
               </h1>
               <div className="flex items-center gap-2 mt-1">
-                <Badge variant={user.role === "host" ? "default" : "secondary"}>
-                  {user.role === "host" ? "Property Host" : "Tenant"}
+                <Badge variant={user.userType !== 'user' ? "default" : "secondary"}>
+                  {user.userType !== 'user' ? "Property Host" : "Tenant"}
                 </Badge>
-                {user.verified && (
+                {user.isVerified && (
                   <Badge variant="outline" className="text-green-600 border-green-600">
                     <Shield className="h-3 w-3 mr-1" />
                     Verified
-                  </Badge>
-                )}
-                {user.role === "host" && (
-                  <Badge variant="outline" className="text-yellow-600 border-yellow-600">
-                    <Star className="h-3 w-3 mr-1" />
-                    {user.rating}
                   </Badge>
                 )}
               </div>
@@ -85,10 +98,10 @@ export const UserDashboard = () => {
         </div>
 
         {/* Role-based Dashboard Content */}
-        {user.role !== "tenant" ? (
-          <TenantDashboard user={user} />
+        {user.userType === 'user' ? (
+          <TenantDashboard user={user} activeTab={activeTab} onTabChange={handleTabChange} />
         ) : (
-          <HostDashboard user={user} />
+          <HostDashboard user={user} activeTab={activeTab} onTabChange={handleTabChange} />
         )}
       </div>
     </div>

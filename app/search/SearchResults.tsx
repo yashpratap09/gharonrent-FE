@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import {  useState } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Select,
   SelectContent,
@@ -22,10 +22,12 @@ import {
 } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { SlidersHorizontal, MapPin, Bed, Bath, Square, Heart } from "lucide-react";
-import Link from "next/link";
+import { SlidersHorizontal,  } from "lucide-react";
 import { useProperties } from "@/hooks/useProperties";
 import { useSearchParams } from "next/navigation";
+import GridCard from "@/components/properties/GridCard";
+
+
 
 
 const SearchResults = () => {
@@ -34,21 +36,27 @@ const SearchResults = () => {
     propertyType: searchParams.get('type') || "",
     minRent: 0,
     maxRent: 100000,
-    bedrooms: "",
+    bedrooms: 1,
     furnishType: "",
     studentAllowed: false,
     coupleAllowed: false,
-    location: searchParams.get('location') || "",
+    locationName: searchParams.get('location') || "",
+    page: 1,
+    limit:10,
+    sortBy:"createdAt",
+    sortOrder:"asc"
   });
   const [sortBy, setSortBy] = useState("relevance");
-  
-  const { 
-    properties, 
-    propertiesTotal, 
-    propertiesLoading, 
-    toggleFavorite, 
-    isTogglingFavorite 
-  } = useProperties(filters);
+const {
+  usePropertiesQuery
+} = useProperties();
+const { data,isLoading: propertiesLoading  } = usePropertiesQuery(filters , true);
+const propertiesTotal = data?.totalProperties || 0
+const properties = data?.properties || []
+const totalPages = data?.totalPages || 1
+
+
+
 
 
   const FilterContent = () => (
@@ -65,10 +73,10 @@ const SearchResults = () => {
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="apartment">Apartment</SelectItem>
-            <SelectItem value="house">House</SelectItem>
-            <SelectItem value="villa">Villa</SelectItem>
-            <SelectItem value="studio">Studio</SelectItem>
+            <SelectItem value="flat">Flat/Apartment</SelectItem>
+            <SelectItem value="room">Room</SelectItem>
+            <SelectItem value="pg">PG/Hostels</SelectItem>
+            <SelectItem value="commercial">Commercial</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -117,7 +125,7 @@ const SearchResults = () => {
         <Label className="text-base font-medium">Bedrooms</Label>
         <Select
           onValueChange={(value) =>
-            setFilters({ ...filters, bedrooms: value })
+            setFilters({ ...filters, bedrooms: Number(value) })
           }
         >
           <SelectTrigger className="mt-2">
@@ -182,7 +190,7 @@ const SearchResults = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Search Results</h1>
+            <h1 className="lg:text-2xl font-bold mb-2 md:text-md  ">Search Results</h1>
             <p className="text-muted-foreground">
               {propertiesLoading ? "Searching..." : `Found ${propertiesTotal} properties`}
             </p>
@@ -190,7 +198,7 @@ const SearchResults = () => {
           
           <div className="flex items-center gap-4">
             {/* Sort Dropdown */}
-            <Select value={sortBy} onValueChange={setSortBy}>
+            {/* <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -200,7 +208,7 @@ const SearchResults = () => {
                 <SelectItem value="price-high">Price: High to Low</SelectItem>
                 <SelectItem value="newest">Newest First</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
 
             {/* Mobile Filter Button */}
             <Sheet>
@@ -252,78 +260,8 @@ const SearchResults = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {properties.map((property) => (
-                  <Card key={property.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-card">
-                  <div className="relative overflow-hidden">
-                    {property.featured && (
-                      <div className="absolute top-4 left-4 z-10">
-                        <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
-                          Featured
-                        </Badge>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => toggleFavorite(property.id)}
-                      disabled={isTogglingFavorite}
-                      className="absolute top-4 right-4 z-10 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
-                    >
-                      <Heart 
-                        className="h-4 w-4 text-muted-foreground hover:text-red-500" 
-                      />
-                    </button>
-                    <img
-                      src={property.images[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075&auto=format&fit=crop"}
-                      alt={property.title}
-                      className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute bottom-4 right-4">
-                      <Badge variant="secondary" className="text-lg font-semibold">
-                        ₹{property.rent.toLocaleString()}/mo
-                      </Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">
-                      {property.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm flex items-center mb-4">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {property.fullAddress}
-                    </p>
-                    <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
-                      <span className="flex items-center">
-                        <Bed className="h-4 w-4 mr-1" />
-                        {property.bedroom} beds
-                      </span>
-                      <span className="flex items-center">
-                        <Bath className="h-4 w-4 mr-1" />
-                        {property.washroom} baths
-                      </span>
-                      <span className="flex items-center">
-                        <Square className="h-4 w-4 mr-1" />
-                        {property.squareFeet} sq.ft
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge variant="outline" className="text-xs">
-                        {property.furnishTypes === "fully" ? "Fully Furnished" : 
-                         property.furnishTypes === "semi" ? "Semi Furnished" : "Unfurnished"}
-                      </Badge>
-                      {property.studentAllowed && (
-                        <Badge variant="outline" className="text-xs">Students OK</Badge>
-                      )}
-                      {property.livingCoupleAllowed && (
-                        <Badge variant="outline" className="text-xs">Couples OK</Badge>
-                      )}
-                    </div>
-                    <Button asChild className="w-full">
-                      <Link href={`/properties/${property.id}`}>
-                        View Details
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-                ))}
+                {properties.map((property) => 
+                <GridCard key={property._id} property={property} />)}
               </div>
             )}
 

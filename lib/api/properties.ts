@@ -1,7 +1,7 @@
 import api from '@/lib/axios';
 
 export interface Property {
-  id: string;
+  _id: string;
   title: string;
   description: string;
   bedroom: number;
@@ -23,7 +23,7 @@ export interface Property {
   rentNegotiable: boolean;
   brokerage?: number;
   brokerageFeeType?: string;
-  images: string[];
+  propertyImages: any;
   amenities: string[];
   userId: string;
   userName: string;
@@ -47,13 +47,13 @@ export interface PropertyFilters {
   coupleAllowed?: boolean;
   page?: number;
   limit?: number;
-  sortBy?: 'rent' | 'createdAt' | 'featured';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: 'rent' | 'createdAt' | 'featured' | string;
+  sortOrder?: 'asc' | 'desc' | string;
 }
 
 export interface PropertySearchResponse {
   properties: Property[];
-  total: number;
+  totalProperties: number;
   page: number;
   totalPages: number;
   hasNext: boolean;
@@ -104,10 +104,10 @@ export const propertiesApi = {
       }
     });
 
-    const response = await api.get<ApiResponse<PropertySearchResponse>>(
+    const response = await api.get<PropertySearchResponse>(
       `/properties?${params.toString()}`
     );
-    return response.data.data;
+    return response.data;
   },
 
   // Get single property by ID

@@ -45,15 +45,15 @@ export const Hero = () => {
                 aria-label="Toggle Flats"
               >
                 <Building2 className="h-5 w-5" />
-                <span>Apartments</span>
+                <span>Flats/Apartments</span>
               </ToggleGroupItem>
               <ToggleGroupItem 
-                value="house" 
+                value="room" 
                 className="flex items-center gap-2 px-6 py-3 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                 aria-label="Toggle Houses"
               >
                 <Home className="h-5 w-5" />
-                <span>Houses</span>
+                <span>Rooom</span>
               </ToggleGroupItem>
               <ToggleGroupItem 
                 value="pg" 

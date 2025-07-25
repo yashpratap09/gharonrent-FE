@@ -6,7 +6,7 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
   const queryClient = useQueryClient();
 
   // Get properties with pagination (on-demand query)
-  const usePropertiesQuery = (queryFilters: PropertyFilters = filters, queryEnabled = true) =>
+  const usePropertiesQuery = (queryFilters: PropertyFilters = filters, queryEnabled = false) =>
     useQuery({
       queryKey: ['properties', queryFilters],
       queryFn: () => propertiesApi.getProperties(queryFilters),
@@ -14,21 +14,6 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
       placeholderData: () => queryClient.getQueryData(['properties', queryFilters]),
       enabled: queryEnabled,
     });
-
-  // Default properties query (disabled by default)
-  const propertiesQuery = usePropertiesQuery(filters, enabled);
-
-  // Infinite query for properties (for load more functionality, disabled by default)
-  const infinitePropertiesQuery = useInfiniteQuery({
-    queryKey: ['properties-infinite', filters],
-    initialPageParam: 1,
-    queryFn: ({ pageParam = 1 }: { pageParam?: number }) =>
-      propertiesApi.getProperties({ ...filters, page: pageParam as number }),
-    getNextPageParam: (lastPage: any) =>
-      lastPage && lastPage.hasNext ? lastPage.page + 1 : undefined,
-    staleTime: 2 * 60 * 1000,
-    enabled,
-  });
 
   // Get single property
   const useProperty = (id: string) => {
@@ -49,14 +34,7 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
       enabled,
     });
 
-  // Get featured properties (only when called)
-  const useFeaturedProperties = (enabled = true) =>
-    useQuery({
-      queryKey: ['featured-properties'],
-      queryFn: propertiesApi.getFeaturedProperties,
-      staleTime: 5 * 60 * 1000,
-      enabled,
-    });
+
 
   // Get user favorites (only when called)
   const useFavorites = (enabled = true) =>
@@ -67,15 +45,7 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
       enabled,
     });
 
-  // Search properties
-  const useSearchProperties = (query: string, searchFilters: PropertyFilters = {}) => {
-    return useQuery({
-      queryKey: ['search-properties', query, searchFilters],
-      queryFn: () => propertiesApi.searchProperties(query, searchFilters),
-      enabled: !!query && query.length > 2,
-      staleTime: 1 * 60 * 1000, // 1 minute
-    });
-  };
+  
 
   // Create property mutation
   const createPropertyMutation = useMutation({
@@ -98,7 +68,7 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['properties'] });
       queryClient.invalidateQueries({ queryKey: ['user-properties'] });
-      queryClient.setQueryData(['property', data.id], data);
+      queryClient.setQueryData(['property', data._id], data);
       toast.success('Property updated successfully!');
     },
     onError: (error: any) => {
@@ -140,23 +110,17 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
   });
 
   return {
-    // Queries
-    properties: propertiesQuery.data?.properties || [],
-    propertiesTotal: propertiesQuery.data?.total || 0,
-    propertiesLoading: propertiesQuery.isLoading,
-    propertiesError: propertiesQuery.error,
-    refetchProperties: propertiesQuery.refetch,
+  
 
     // Expose hooks for on-demand queries
     usePropertiesQuery,
     useUserProperties,
-    useFeaturedProperties,
     useFavorites,
     useProperty,
-    useSearchProperties,
+    
 
     // Infinite query
-    infiniteProperties: infinitePropertiesQuery,
+    // infiniteProperties: infinitePropertiesQuery,
 
     // Mutations
     createProperty: (data: CreatePropertyRequest) => createPropertyMutation.mutate(data),
