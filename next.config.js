@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // output: 'export',
+  reactStrictMode: true, // for cloudflare
+  experimental: {
+    runtime: 'edge', // for cloudflare
+  },
   trailingSlash: true,
   eslint: {
     ignoreDuringBuilds: true,
