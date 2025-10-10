@@ -10,6 +10,13 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: { unoptimized: true },
+  // Optimize for Edge Runtime
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...config.externals, 'canvas', 'jsdom'];
+    }
+    return config;
+  },
   async rewrites() {
     return [
       {
