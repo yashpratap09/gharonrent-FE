@@ -71,14 +71,22 @@ export const AdvancedSearchResults = () => {
   const queryFilters = useMemo(() => {
     const urlParams = new URLSearchParams(searchParams.toString());
     const result: Partial<SearchFilters> = {};
+    
+    // Path parameters that should be parsed from URL path, not query string
+    const pathParams = ['propertyType', 'location', 'latitude', 'longitude'];
+    
     urlParams.forEach((value, key) => {
+      // Skip path parameters from query string - they should come from URL path only
+      if (pathParams.includes(key)) return;
+      
       if (key === 'minRent' || key === 'maxRent' || key === 'page' || key === 'limit') {
         result[key] = parseInt(value) || (key === 'page' ? 1 : key === 'limit' ? 12 : 0);
       } else if (key === 'studentAllowed' || key === 'coupleAllowed' || key === 'fullyIndependent' || 
                  key === 'ownerFree' || key === 'rentNegotiable' || key === 'photoOnly' || key === 'primeOnly') {
         result[key] = value === 'true';
       } else {
-        (result as any)[key] = value;
+        // Decode value to handle URL-encoded strings
+        (result as any)[key] = decodeURIComponent(value);
       }
     });
     return result;
@@ -102,7 +110,14 @@ export const AdvancedSearchResults = () => {
     isUpdatingUrl.current = true;
     const searchUrl = buildSearchUrl(debouncedFilters);
     const queryParams = new URLSearchParams();
+    
+    // Exclude URL path parameters from query string to prevent double-encoding
+    const pathParams = ['propertyType', 'location', 'latitude', 'longitude'];
+    
     Object.entries(debouncedFilters).forEach(([key, value]) => {
+      // Skip path parameters - they're already in the URL path
+      if (pathParams.includes(key)) return;
+      
       if (value !== defaultFilters[key as keyof SearchFilters] && 
           value !== "" && value !== false && value !== 0 && value !== null) {
         queryParams.set(key, value!.toString());

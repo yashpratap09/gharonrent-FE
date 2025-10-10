@@ -10,8 +10,8 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
   const result: SearchUrlParams = {};
   
   if (params.length >= 1) {
-    // Parse the main search string like "Room-for-rent-in-Chandigarh-India"
-    const searchString = params[0];
+    // Decode the search string to handle URL-encoded characters
+    const searchString = decodeURIComponent(params[0]);
     
     // Extract location after "in-"
     const locationMatch = searchString.match(/in-([^-]+(?:-[^-]+)*)/i);
@@ -31,8 +31,8 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
   }
   
   if (params.length >= 2) {
-    // Property type confirmation
-    const typeParam = params[1].toLowerCase();
+    // Property type confirmation - decode to handle URL encoding
+    const typeParam = decodeURIComponent(params[1]).toLowerCase();
     if (typeParam === 'room') result.propertyType = 'Room';
     else if (typeParam === 'flat' || typeParam === 'apartment') result.propertyType = 'Flat';
     else if (typeParam === 'pg') result.propertyType = 'PG';
@@ -40,14 +40,16 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
   }
   
   if (params.length >= 3) {
-    // Latitude
-    const lat = parseFloat(params[2]);
+    // Latitude - decode and parse
+    const latParam = decodeURIComponent(params[2]);
+    const lat = parseFloat(latParam);
     if (!isNaN(lat)) result.latitude = lat;
   }
   
   if (params.length >= 4) {
-    // Longitude
-    const lng = parseFloat(params[3]);
+    // Longitude - decode and parse
+    const lngParam = decodeURIComponent(params[3]);
+    const lng = parseFloat(lngParam);
     if (!isNaN(lng)) result.longitude = lng;
   }
   
