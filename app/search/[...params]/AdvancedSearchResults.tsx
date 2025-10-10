@@ -107,7 +107,8 @@ export const AdvancedSearchResults = () => {
     if (isUpdatingUrl.current) return;
     // Only update URL if at least location or propertyType is set
     if (!debouncedFilters.location && !debouncedFilters.propertyType) return;
-    isUpdatingUrl.current = true;
+    
+    // Build the new URL
     const searchUrl = buildSearchUrl(debouncedFilters);
     const queryParams = new URLSearchParams();
     
@@ -125,10 +126,20 @@ export const AdvancedSearchResults = () => {
     });
     const queryString = queryParams.toString();
     const fullUrl = queryString ? `${searchUrl}?${queryString}` : searchUrl;
-    router.replace(fullUrl, { scroll: false });
-    setTimeout(() => {
-      isUpdatingUrl.current = false;
-    }, 100);
+    
+    // Get current URL path + query
+    const currentPath = window.location.pathname;
+    const currentQuery = window.location.search;
+    const currentFullUrl = `${currentPath}${currentQuery}`;
+    
+    // Only update URL if it's different from the current one
+    if (currentFullUrl !== fullUrl) {
+      isUpdatingUrl.current = true;
+      router.replace(fullUrl, { scroll: false });
+      setTimeout(() => {
+        isUpdatingUrl.current = false;
+      }, 100);
+    }
   }, [debouncedFilters, router, isInitialized]);
 
   // When building the query for usePropertiesQuery, only include non-null filters
