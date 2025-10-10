@@ -160,7 +160,7 @@ export const AdvancedSearchResults = () => {
   const handleClearFilters = useCallback(() => {
     setFilters(defaultFilters);
     setIsFilterOpen(false);
-    router.replace("/search/commercial-for-rent-in-chandigarh/commercial/30.7333148/76.7794179");
+    router.replace("/search");
   }, [router]);
 
   // Calculate active filters count

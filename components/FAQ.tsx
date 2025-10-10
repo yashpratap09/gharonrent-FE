@@ -62,18 +62,20 @@ export const FAQ = () => {
           {faqs.map((faq, index) => (
             <Card key={index} className="shadow-lg border-0 bg-background/80 backdrop-blur-xl">
               <CardContent className="p-0">
-                <Button
-                  variant="ghost"
-                  className="w-full p-6 text-left justify-between h-auto hover:bg-muted/50"
+                <div className="flex items-start p-6 hover:bg-muted/50 transition-colors cursor-pointer"
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
                 >
-                  <span className="font-semibold text-base pr-4">{faq.question}</span>
-                  {openFaq === index ? (
-                    <ChevronUp className="h-5 w-5 flex-shrink-0" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 flex-shrink-0" />
-                  )}
-                </Button>
+                  <p className="font-semibold text-base pr-4 text-left flex-1">
+                    {faq.question}
+                  </p>
+                  <div className="flex-shrink-0 ml-2 pt-0.5">
+                    {openFaq === index ? (
+                      <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                </div>
                 {openFaq === index && (
                   <div className="px-6 pb-6">
                     <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>

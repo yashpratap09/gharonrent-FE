@@ -62,32 +62,35 @@ export function buildSearchUrl(filters: any): string {
     return '/search';
   }
   
-  let searchString = '';
+  // Create URL segments without encoding here - let Next.js handle the encoding
+  const segments = [];
   
-  // Build the main search string
   if (propertyType && location) {
     const typeSlug = propertyType.toLowerCase();
     const locationSlug = location.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-    searchString = `${typeSlug}-for-rent-in-${locationSlug}`;
+    segments.push(`${typeSlug}-for-rent-in-${locationSlug}`);
+    
+    // Add property type as a separate segment
+    segments.push(typeSlug);
   } else if (location) {
     const locationSlug = location.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-    searchString = `properties-for-rent-in-${locationSlug}`;
+    segments.push(`properties-for-rent-in-${locationSlug}`);
   } else if (propertyType) {
     const typeSlug = propertyType.toLowerCase();
-    searchString = `${typeSlug}-for-rent`;
+    segments.push(`${typeSlug}-for-rent`);
+    segments.push(typeSlug);
   }
   
-  const urlParts = ['/search', searchString];
-  
-  if (propertyType) {
-    urlParts.push(propertyType.toLowerCase());
-  }
-  
+  // Add coordinates if available
   if (latitude && longitude) {
-    urlParts.push(latitude.toString(), longitude.toString());
+    // Convert to string and remove any existing encoding
+    const lat = String(latitude).split('?')[0].split('&')[0];
+    const lng = String(longitude).split('?')[0].split('&')[0];
+    segments.push(lat, lng);
   }
   
-  return urlParts.join('/');
+  // Join with slashes - Next.js will handle the proper URL encoding
+  return `/search/${segments.join('/')}`;
 }
 
 // Extract location from URL string
