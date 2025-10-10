@@ -58,6 +58,15 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
       enabled,
     });
 
+  // Get featured properties (only when called)
+  const useFeaturedProperties = (enabled = true) =>
+    useQuery({
+      queryKey: ['featured-properties'],
+      queryFn: propertiesApi.getFeaturedProperties,
+      staleTime: 5 * 60 * 1000, // 5 minutes for featured properties
+      enabled,
+    });
+
   
 
   // Create property mutation
@@ -129,6 +138,7 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
     usePropertiesQuery,
     useUserProperties,
     useFavorites,
+    useFeaturedProperties,
     useProperty,
     usePropertyBySlug,
     

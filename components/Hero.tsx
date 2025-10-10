@@ -5,7 +5,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Building2, Home, Warehouse, Hotel, Search } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LocationSearchOptimized, PlaceDetails } from "./LocationSearchOptimized";
+import { LocationSearchOptimized } from "./LocationSearchOptimized";
+import { PlaceDetails } from "@/lib/api/places";
 
 export const Hero = () => {
   const [propertyType, setPropertyType] = useState("flat");

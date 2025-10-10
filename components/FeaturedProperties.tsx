@@ -40,10 +40,10 @@ const { data: featuredPropertiesData, isLoading: featuredPropertiesLoading } = u
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredPropertiesData?.slice(0, 4).map((property) => (
-            <Card key={property.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-card">
+            <Card key={property._id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 bg-card">
               <div className="relative overflow-hidden">
                 <img
-                  src={property.images[0] || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075&auto=format&fit=crop"}
+                  src={property.propertyImages[0]?.imagePath || "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=2075&auto=format&fit=crop"}
                   alt={property.title}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -53,7 +53,7 @@ const { data: featuredPropertiesData, isLoading: featuredPropertiesLoading } = u
                   </Badge>
                 </div>
                 <button
-                  onClick={() => toggleFavorite(property.id)}
+                  onClick={() => toggleFavorite(property._id)}
                   disabled={isTogglingFavorite}
                   className="absolute top-4 right-4 p-2 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
                 >
@@ -88,7 +88,7 @@ const { data: featuredPropertiesData, isLoading: featuredPropertiesLoading } = u
                   </span>
                 </div>
                 <Button asChild className="w-full">
-                  <Link href={`/properties/${property.id}`}>
+                  <Link href={`/properties/${property._id}`}>
                     View Details
                   </Link>
                 </Button>
