@@ -1,7 +1,9 @@
 import api from '@/lib/axios';
+import { ApiResponse } from './types';
 
 export interface Property {
   _id: string;
+  slug?: string;
   title: string;
   description: string;
   bedroom: number;
@@ -42,12 +44,15 @@ export interface PropertyFilters {
   maxRent?: number;
   bedrooms?: number;
   location?: string;
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
   furnishType?: string;
   studentAllowed?: boolean;
   coupleAllowed?: boolean;
   page?: number;
   limit?: number;
-  sortBy?: 'rent' | 'createdAt' | 'featured' | string;
+  sortBy?: 'rent' | 'createdAt' | 'featured' | 'distance' | string;
   sortOrder?: 'asc' | 'desc' | string;
 }
 
@@ -86,11 +91,6 @@ export interface CreatePropertyRequest {
   images: File[];
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-}
 
 // Properties API functions
 export const propertiesApi = {
@@ -114,6 +114,12 @@ export const propertiesApi = {
   getProperty: async (id: string): Promise<Property> => {
     const response = await api.get<ApiResponse<Property>>(`/properties/${id}`);
     return response.data.data;
+  },
+
+  // Get single property by slug (with subscription data)
+  getPropertyBySlug: async (slug: string): Promise<{property: Property, subscription?: any}> => {
+    const response = await api.get<{property: Property, subscription?: any}>(`/properties/${slug}`);
+    return response.data;
   },
 
   // Create new property

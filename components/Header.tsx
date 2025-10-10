@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,12 +42,10 @@ export const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2 group">
-            <Home className="h-6 w-6 text-primary group-hover:scale-110 transition-transform" />
-            <span className="text-xl font-semibold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              RentHaven
-            </span>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center ">
+          
+           {theme === "dark" ?  <Image src="/images/logo.png" alt="Logo" width={100} height={60} /> : <Image src="/images/logo_black.png" alt="Logo" width={100} height={60} />}
           </Link>
 
           {/* Desktop Navigation */}

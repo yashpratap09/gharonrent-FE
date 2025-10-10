@@ -13,6 +13,9 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
       staleTime: 2 * 60 * 1000, // 2 minutes
       placeholderData: () => queryClient.getQueryData(['properties', queryFilters]),
       enabled: queryEnabled,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     });
 
   // Get single property
@@ -21,6 +24,16 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
       queryKey: ['property', id],
       queryFn: () => propertiesApi.getProperty(id),
       enabled: !!id,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
+  };
+
+  // Get property by slug
+  const usePropertyBySlug = (slug: string) => {
+    return useQuery({
+      queryKey: ['property-slug', slug],
+      queryFn: () => propertiesApi.getPropertyBySlug(slug),
+      enabled: !!slug,
       staleTime: 5 * 60 * 1000, // 5 minutes
     });
   };
@@ -117,6 +130,7 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
     useUserProperties,
     useFavorites,
     useProperty,
+    usePropertyBySlug,
     
 
     // Infinite query

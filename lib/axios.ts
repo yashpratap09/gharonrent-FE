@@ -15,6 +15,8 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = Cookies.get('auth_token');
+    console.log('Making API request to:', config.url);
+    console.log('Auth token:', token ? 'Present' : 'Missing');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

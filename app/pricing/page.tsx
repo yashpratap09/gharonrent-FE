@@ -1,12 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Zap, Crown } from "lucide-react";
+import { Check, Star, Zap, Crown, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
+import { paymentApi } from "@/lib/api/payment";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 const pricingPlans = [
   {
@@ -109,8 +120,119 @@ const additionalServices = [
 ];
 
 export default function PricingPage() {
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleSubscribe = async (planName: string) => {
+    console.log('Subscribe clicked for plan:', planName);
+    console.log('User authenticated:', isAuthenticated);
+    console.log('User data:', user);
+    
+    if (!isAuthenticated || !user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to subscribe to a plan.",
+        variant: "destructive"
+      });
+      router.push('/login');
+      return;
+    }
+
+    if (planName === 'Enterprise') {
+      router.push('/contact');
+      return;
+    }
+
+    // Handle Basic (free) plan
+    if (planName === 'Basic') {
+      try {
+        setLoading(planName);
+        console.log('Attempting to create order for Basic plan...');
+        const orderData = await paymentApi.createOrder({ planName });
+        console.log('Basic plan order response:', orderData);
+        toast({
+          title: "Success",
+          description: "Basic plan activated successfully!",
+        });
+        router.push('/dashboard?tab=plan');
+      } catch (error: any) {
+        console.error('Free plan activation error:', error);
+        console.error('Error details:', error.response?.data);
+        toast({
+          title: "Error",
+          description: error.response?.data?.message || "Failed to activate free plan. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(null);
+      }
+      return;
+    }
+
+    // Handle paid plans with Razorpay
+    try {
+      setLoading(planName);
+      console.log('Creating order for plan:', planName);
+      const orderData = await paymentApi.createOrder({ planName });
+      console.log('Order data received:', orderData);
+      
+      const options = {
+        key: "rzp_test_RF7XfGz9LTnuym",
+        amount: orderData.amount,
+        // currency: orderData.currency,
+        // name: "RentHaven",
+        // description: `Subscription for ${planName} plan`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          try {
+            await paymentApi.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            
+            toast({
+              title: "Payment Successful",
+              description: `${planName} plan activated successfully!`
+            });
+            
+            router.push('/dashboard');
+          } catch (error) {
+            toast({
+              title: "Payment Verification Failed",
+              description: "Please contact support if amount was deducted.",
+              variant: "destructive"
+            });
+          }
+        },
+        prefill: {
+          name: user?.name || '',
+          email: user?.email || '',
+        },
+        theme: {
+          color: "#3B82F6",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error: any) {
+      console.error('Payment initiation error:', error);
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to initiate payment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <>
+      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
         {/* Hero Section */}
@@ -179,11 +301,17 @@ export default function PricingPage() {
                           ? 'bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90' 
                           : ''
                       }`}
-                      asChild
+                      onClick={() => handleSubscribe(plan.name)}
+                      disabled={loading === plan.name}
                     >
-                      <Link href={plan.name === "Enterprise" ? "/contact" : "/signup"}>
-                        {plan.buttonText}
-                      </Link>
+                      {loading === plan.name ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Processing...
+                        </>
+                      ) : (
+                        plan.buttonText
+                      )}
                     </Button>
                   </CardContent>
                 </Card>

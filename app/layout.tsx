@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import QueryProvider from '@/providers/QueryProvider';
 import AuthProvider from '@/providers/AuthProvider';
+import { WishlistProvider } from '@/providers/WishlistProvider';
 import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -72,6 +73,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -89,7 +91,9 @@ export default function RootLayout({
         >
           <QueryProvider>
             <AuthProvider>
-              {children}
+              <WishlistProvider>
+                {children}
+              </WishlistProvider>
               <Toaster
                 position="top-right"
                 toastOptions={{

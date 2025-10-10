@@ -96,11 +96,12 @@ const AddProperty = () => {
       images,
     };
 
-    createProperty(propertyData, {
-      onSuccess: () => {
-        router.push('/');
-      }
-    });
+    createProperty(propertyData, );  
+    {
+      // onSuccess: () => {
+      //   router.push('/');
+      // }
+    }
   };
 
   if (!isAuthenticated) {

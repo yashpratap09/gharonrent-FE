@@ -1,5 +1,6 @@
 import api from '@/lib/axios';
 import { User } from '@/store/authStore';
+import { ApiResponse } from './types';
 
 export interface LoginRequest {
   email: string;
@@ -21,11 +22,6 @@ export interface AuthResponse {
   message: string;
 }
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message: string;
-}
 
 // Auth API functions
 export const authApi = {

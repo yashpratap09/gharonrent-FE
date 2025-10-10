@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,57 +20,129 @@ import {
   X,
   Shield,
   Star,
-  Home
+  Home,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock user data - replace with actual user context/API
-const mockUser = {
-  id: "1",
-  name: "John Doe",
-  email: "john.doe@example.com",
-  phone: "+91 98765 43210",
-  avatar: "",
-  role: "tenant", // tenant or host
-  location: "Mumbai, Maharashtra",
-  joinedDate: "2024-01-15",
-  bio: "Looking for a comfortable and affordable rental property in Mumbai. Prefer fully furnished apartments with good connectivity.",
-  verified: true,
-  rating: 4.8,
-  totalReviews: 24,
-  plan: "Professional",
-  planExpiry: "2024-12-31"
-};
+import { profileApi, ProfileData, ProfileUpdateRequest } from "@/lib/api/profile";
+import { useAuth } from "@/hooks/useAuth";
 
 export const UserProfile = () => {
-  const [user, setUser] = useState(mockUser);
+  const { user: authUser, isAuthenticated } = useAuth();
+  const [user, setUser] = useState<ProfileData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    name: user.name,
-    phone: user.phone,
-    location: user.location,
-    bio: user.bio
+  const [editForm, setEditForm] = useState<ProfileUpdateRequest>({
+    name: '',
+    phoneNumber: '',
+    address: '',
+    bio: ''
   });
   const { toast } = useToast();
 
-  const handleSave = () => {
-    setUser({ ...user, ...editForm });
-    setIsEditing(false);
-    toast({
-      title: "Profile Updated",
-      description: "Your profile has been successfully updated.",
-    });
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        setLoading(true);
+        const profileData = await profileApi.getProfile();
+        setUser(profileData);
+        setEditForm({
+          name: profileData.name || '',
+          phoneNumber: profileData.phoneNumber || '',
+          address: profileData.address || '',
+          bio: profileData.bio || ''
+        });
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [isAuthenticated, toast]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    
+    try {
+      setUpdating(true);
+      const updatedUser = await profileApi.updateProfile(editForm);
+      setUser(updatedUser);
+      setIsEditing(false);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUpdating(false);
+    }
   };
 
   const handleCancel = () => {
+    if (!user) return;
     setEditForm({
-      name: user.name,
-      phone: user.phone,
-      location: user.location,
-      bio: user.bio
+      name: user.name || '',
+      phoneNumber: user.phoneNumber || '',
+      address: user.address || '',
+      bio: user.bio || ''
     });
     setIsEditing(false);
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20 flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <CardContent>
+            <h2 className="text-xl font-semibold mb-2">Please Login</h2>
+            <p className="text-muted-foreground">You need to be logged in to view your profile.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20 flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <CardContent>
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading profile...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20 flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <CardContent>
+            <h2 className="text-xl font-semibold mb-2">Profile Not Found</h2>
+            <p className="text-muted-foreground">Unable to load profile data.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
@@ -83,10 +155,10 @@ export const UserProfile = () => {
                 <Avatar className="h-24 w-24 md:h-32 md:w-32">
                   <AvatarImage src={user.avatar} />
                   <AvatarFallback className="text-2xl">
-                    {user.name.split(" ").map(n => n[0]).join("")}
+                    {user.name ? user.name.split(" ").map(n => n[0]).join("") : "U"}
                   </AvatarFallback>
                 </Avatar>
-                {user.verified && (
+                {user.isVerified && (
                   <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-2">
                     <Shield className="h-4 w-4 text-white" />
                   </div>
@@ -96,34 +168,39 @@ export const UserProfile = () => {
               <div className="flex-1 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{user.name}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold">{user.name || 'User'}</h1>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={user.role === "host" ? "default" : "secondary"}>
-                        {user.role === "host" ? "Property Host" : "Tenant"}
+                      <Badge variant={user.userType === "host" ? "default" : "secondary"}>
+                        {user.userType === "host" ? "Property Host" : "Tenant"}
                       </Badge>
-                      {user.verified && (
+                      {user.isVerified && (
                         <Badge variant="outline" className="text-green-600 border-green-600">
                           Verified
+                        </Badge>
+                      )}
+                      {user.isPaid && (
+                        <Badge variant="outline" className="text-blue-600 border-blue-600">
+                          Premium
                         </Badge>
                       )}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4">
-                    {user.role === "host" && (
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-semibold">{user.rating}</span>
-                        <span className="text-muted-foreground">({user.totalReviews})</span>
-                      </div>
-                    )}
                     <Button
                       variant={isEditing ? "destructive" : "outline"}
                       onClick={isEditing ? handleCancel : () => setIsEditing(true)}
                       className="flex items-center gap-2"
+                      disabled={updating}
                     >
-                      {isEditing ? <X className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
-                      {isEditing ? "Cancel" : "Edit Profile"}
+                      {updating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isEditing ? (
+                        <X className="h-4 w-4" />
+                      ) : (
+                        <Edit3 className="h-4 w-4" />
+                      )}
+                      {updating ? "Updating..." : isEditing ? "Cancel" : "Edit Profile"}
                     </Button>
                   </div>
                 </div>
@@ -131,23 +208,19 @@ export const UserProfile = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Mail className="h-4 w-4" />
-                    <span>{user.email}</span>
+                    <span>{user.email || 'No email'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Phone className="h-4 w-4" />
-                    <span>{user.phone}</span>
+                    <span>{user.phoneNumber || 'Not provided'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
-                    <span>{user.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-4 w-4" />
-                    <span>Joined {new Date(user.joinedDate).toLocaleDateString()}</span>
+                    <span>{user.address || 'Not provided'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Home className="h-4 w-4" />
-                    <span>{user.plan} Plan</span>
+                    <span>{user.userType} Account</span>
                   </div>
                 </div>
               </div>
@@ -179,23 +252,26 @@ export const UserProfile = () => {
                           id="name"
                           value={editForm.name}
                           onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                          disabled={updating}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
+                        <Label htmlFor="phoneNumber">Phone Number</Label>
                         <Input
-                          id="phone"
-                          value={editForm.phone}
-                          onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                          id="phoneNumber"
+                          value={editForm.phoneNumber}
+                          onChange={(e) => setEditForm({...editForm, phoneNumber: e.target.value})}
+                          disabled={updating}
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
+                      <Label htmlFor="address">Address</Label>
                       <Input
-                        id="location"
-                        value={editForm.location}
-                        onChange={(e) => setEditForm({...editForm, location: e.target.value})}
+                        id="address"
+                        value={editForm.address}
+                        onChange={(e) => setEditForm({...editForm, address: e.target.value})}
+                        disabled={updating}
                       />
                     </div>
                     <div className="space-y-2">
@@ -205,11 +281,12 @@ export const UserProfile = () => {
                         value={editForm.bio}
                         onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
                         rows={4}
+                        disabled={updating}
                       />
                     </div>
-                    <Button onClick={handleSave} className="flex items-center gap-2">
-                      <Save className="h-4 w-4" />
-                      Save Changes
+                    <Button onClick={handleSave} className="flex items-center gap-2" disabled={updating}>
+                      {updating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      {updating ? 'Saving...' : 'Save Changes'}
                     </Button>
                   </div>
                 ) : (
@@ -217,24 +294,24 @@ export const UserProfile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <Label className="text-muted-foreground">Full Name</Label>
-                        <p className="font-medium">{user.name}</p>
+                        <p className="font-medium">{user.name || 'Not provided'}</p>
                       </div>
                       <div>
                         <Label className="text-muted-foreground">Email</Label>
-                        <p className="font-medium">{user.email}</p>
+                        <p className="font-medium">{user.email || 'No email'}</p>
                       </div>
                       <div>
                         <Label className="text-muted-foreground">Phone</Label>
-                        <p className="font-medium">{user.phone}</p>
+                        <p className="font-medium">{user.phoneNumber || 'Not provided'}</p>
                       </div>
                       <div>
-                        <Label className="text-muted-foreground">Location</Label>
-                        <p className="font-medium">{user.location}</p>
+                        <Label className="text-muted-foreground">Address</Label>
+                        <p className="font-medium">{user.address || 'Not provided'}</p>
                       </div>
                     </div>
                     <div>
                       <Label className="text-muted-foreground">Bio</Label>
-                      <p className="font-medium mt-1">{user.bio}</p>
+                      <p className="font-medium mt-1">{user.bio || 'No bio provided'}</p>
                     </div>
                   </div>
                 )}
@@ -273,12 +350,14 @@ export const UserProfile = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
-                      <h3 className="font-semibold">{user.plan} Plan</h3>
+                      <h3 className="font-semibold">{user.isPaid ? 'Premium' : 'Free'} Plan</h3>
                       <p className="text-sm text-muted-foreground">
-                        Expires on {new Date(user.planExpiry).toLocaleDateString()}
+                        Account Status: {user.isConfirmed ? 'Confirmed' : 'Pending Confirmation'}
                       </p>
                     </div>
-                    <Button variant="outline">Upgrade Plan</Button>
+                    {!user.isPaid && (
+                      <Button variant="outline">Upgrade Plan</Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

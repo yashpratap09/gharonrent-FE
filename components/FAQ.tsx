@@ -44,7 +44,7 @@ export const FAQ = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <section className="py-20 px-4 bg-muted/30">
+    <section className="py-20 px-4 bg-background">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">

@@ -4,8 +4,9 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
+  --orange-primary: 255, 150, 56;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,62 +14,94 @@
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
     --background-end-rgb: 0, 0, 0;
+    --orange-primary: 255, 150, 56;
   }
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    /* Main background and text colors - Pure white and black */
+    --background: 0 0% 100%;  /* Pure white */
+    --foreground: 0 0% 0%;    /* Pure black */
+    
+    /* Card colors - White background, black text */
+    --card: 0 0% 100%;        /* White cards */
+    --card-foreground: 0 0% 0%; /* Black text on cards */
+    
+    /* Popover colors - White background, black text */
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --popover-foreground: 0 0% 0%;
+    
+    /* Primary orange theme - Only #ff9638 */
+    --primary: 24 100% 61%;      /* #ff9638 */
+    --primary-foreground: 0 0% 100%; /* White text on orange */
+    
+    /* Secondary - Light gray for subtle elements */
+    --secondary: 0 0% 96%;       /* Very light gray */
+    --secondary-foreground: 0 0% 0%; /* Black text */
+    
+    /* Muted colors - Light grays only */
+    --muted: 0 0% 96%;           /* Light gray */
+    --muted-foreground: 0 0% 45%; /* Medium gray text */
+    
+    /* Accent colors - Same as secondary */
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 0%;
+    
+    /* Destructive colors - Keep red for errors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Border and input colors - Light grays */
+    --border: 0 0% 90%;          /* Light gray borders */
+    --input: 0 0% 96%;           /* Light gray inputs */
+    --ring: 24 100% 61%;         /* Orange focus ring */
+    
+    /* Chart colors - Only orange variations */
+    --chart-1: 24 100% 61%;      /* #ff9638 */
+    --chart-2: 24 100% 70%;      /* Lighter orange */
+    --chart-3: 24 100% 50%;      /* Darker orange */
+    --chart-4: 0 0% 70%;         /* Gray */
+    --chart-5: 0 0% 50%;         /* Dark gray */
+    
+    --radius: 0.75rem;
   }
+  
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    /* Dark mode - Black background, white text, orange accents */
+    --background: 0 0% 0%;       /* Pure black */
+    --foreground: 0 0% 100%;     /* Pure white */
+    
+    --card: 0 0% 5%;             /* Very dark gray cards */
+    --card-foreground: 0 0% 100%; /* White text */
+    
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    
+    --primary: 24 100% 61%;      /* Keep #ff9638 */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 10%;       /* Dark gray */
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 65%;
+    
+    --accent: 0 0% 10%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 0 0% 15%;          /* Dark gray borders */
+    --input: 0 0% 10%;           /* Dark gray inputs */
+    --ring: 24 100% 61%;         /* Orange focus ring */
+    
+    --chart-1: 24 100% 61%;      /* #ff9638 */
+    --chart-2: 24 100% 70%;
+    --chart-3: 24 100% 50%;
+    --chart-4: 0 0% 70%;
+    --chart-5: 0 0% 50%;
   }
 }
 
@@ -78,6 +111,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: linear-gradient(135deg, rgb(var(--background-start-rgb)) 0%, rgb(var(--background-end-rgb)) 100%);
+    min-height: 100vh;
   }
 }
 
@@ -106,20 +141,87 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Simple orange theme */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
+  background: #f5f5f5;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground));
-  border-radius: 4px;
+  background: #ff9638;
+  border-radius: 5px;
+  border: 2px solid #ffffff;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary));
+  background: #e6751a;
+}
+
+/* Simple orange utilities - Only #ff9638, black, and white */
+@layer utilities {
+  .bg-orange {
+    background-color: #ff9638;
+  }
+  
+  .bg-white {
+    background-color: #ffffff;
+  }
+  
+  .bg-black {
+    background-color: #000000;
+  }
+  
+  .text-orange {
+    color: #ff9638;
+  }
+  
+  .text-white {
+    color: #ffffff;
+  }
+  
+  .text-black {
+    color: #000000;
+  }
+  
+  .border-orange {
+    border-color: #ff9638;
+  }
+  
+  .border-white {
+    border-color: #ffffff;
+  }
+  
+  .border-black {
+    border-color: #000000;
+  }
+  
+  .shadow-orange {
+    box-shadow: 0 10px 25px -5px rgba(255, 150, 56, 0.2), 0 4px 6px -2px rgba(255, 150, 56, 0.1);
+  }
+  
+  .shadow-orange-lg {
+    box-shadow: 0 20px 40px -10px rgba(255, 150, 56, 0.3), 0 8px 16px -4px rgba(255, 150, 56, 0.2);
+  }
+  
+  .hover-lift {
+    transition: all 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px -5px rgba(255, 150, 56, 0.25);
+  }
+  
+  /* Simple gradient with only orange and white */
+  .bg-gradient-orange-white {
+    background: linear-gradient(135deg, #ff9638 0%, #ffffff 100%);
+  }
+  
+  .bg-gradient-white-orange {
+    background: linear-gradient(135deg, #ffffff 0%, #ff9638 100%);
+  }
 }

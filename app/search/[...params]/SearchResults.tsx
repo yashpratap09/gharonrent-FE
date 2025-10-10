@@ -42,7 +42,7 @@ const SearchResults = () => {
     coupleAllowed: false,
     locationName: searchParams.get('location') || "",
     page: 1,
-    limit:10,
+    limit:100,
     sortBy:"createdAt",
     sortOrder:"asc"
   });
