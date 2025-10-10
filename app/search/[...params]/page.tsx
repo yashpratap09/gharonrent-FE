@@ -1,4 +1,7 @@
 "use client";
+
+export const runtime = 'edge';
+
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AdvancedSearchResults } from "@/app/search/[...params]/AdvancedSearchResults";
