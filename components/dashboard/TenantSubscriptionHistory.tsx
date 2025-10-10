@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
 import { 
   History, 
   Calendar,
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+// import { format } from "date-fns";
 import Link from "next/link";
 
 interface SubscriptionStats {
@@ -220,10 +220,14 @@ export const TenantSubscriptionHistory = () => {
                     </span>
                   </div>
                   {stats.currentSubscription.propertyViewLimit !== -1 && (
-                    <Progress 
-                      value={(stats.currentSubscription.propertyViewsUsed / stats.currentSubscription.propertyViewLimit) * 100} 
-                      className="h-2"
-                    />
+                    <div className="h-2 bg-gray-200 rounded-full">
+                      <div 
+                        className="h-2 bg-primary rounded-full transition-all"
+                        style={{ 
+                          width: `${Math.min(100, Math.max(0, (stats.currentSubscription.propertyViewsUsed / stats.currentSubscription.propertyViewLimit) * 100 || 0))}%` 
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -295,8 +299,8 @@ export const TenantSubscriptionHistory = () => {
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          {format(new Date(subscription.startDate), 'MMM dd, yyyy')} - {' '}
-                          {format(new Date(subscription.endDate), 'MMM dd, yyyy')}
+                          {new Date(subscription.startDate).toLocaleDateString()} - {' '}
+                          {new Date(subscription.endDate).toLocaleDateString()}
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">

@@ -21,7 +21,7 @@ interface AuthState {
   setUser: (user: User) => void;
   setToken: (token: string) => void;
   setLoading: (loading: boolean) => void;
-  login: (user: User, token: string, refreshToken: string) => void;
+  login: (user: User, token: string) => void;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
   clearAuth: () => void;

@@ -25,7 +25,7 @@ export const useAuth = () => {
       setLoading(true);
     },
     onSuccess: (data) => {
-      setLogin(data.user, data.token, data.refreshToken);
+      setLogin(data.user, data.token);
       toast.success(data.message || 'Login successful!');
       router.push('/');
     },
@@ -46,7 +46,7 @@ export const useAuth = () => {
     },
     onSuccess: (data) => {
       console.log(data);
-      setLogin(data.user, data.token, data.refreshToken);
+      setLogin(data.user, data.token);
       toast.success(data.message || 'Account created successfully!');
       router.push('/');
     },

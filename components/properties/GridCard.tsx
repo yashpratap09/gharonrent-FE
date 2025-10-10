@@ -70,7 +70,7 @@ const GridCard = ({property}:Props) => {
         <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-1">
           {property.title}
         </h3>
-        <p className="text-muted-foreground text-sm  items-center mb-4 line-clamp-1">
+        <p className="text-muted-foreground text-sm flex items-center mb-4 line-clamp-1">
           {property.fullAddress}
         </p>
         <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">

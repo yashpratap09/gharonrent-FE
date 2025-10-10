@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
 import { 
   Crown, 
   Check, 
@@ -92,10 +92,10 @@ export const PlanCard = ({ user }: PlanCardProps) => {
                   <span>Properties Listed</span>
                   <span>{usageStats.propertiesUsed} / {currentPlan.limits.properties}</span>
                 </div>
-                <Progress 
-                  value={(usageStats.propertiesUsed / currentPlan.limits.properties) * 100} 
+                {/* <Progress 
+                  value={Math.min(100, Math.max(0, (usageStats.propertiesUsed / currentPlan.limits.properties) * 100 || 0))} 
                   className="h-2"
-                />
+                /> */}
               </div>
 
               <div>
@@ -103,10 +103,10 @@ export const PlanCard = ({ user }: PlanCardProps) => {
                   <span>Photos Uploaded</span>
                   <span>{usageStats.photosUsed} / {currentPlan.limits.photos * currentPlan.limits.properties}</span>
                 </div>
-                <Progress 
-                  value={(usageStats.photosUsed / (currentPlan.limits.photos * currentPlan.limits.properties)) * 100} 
+                {/* <Progress 
+                  value={Math.min(100, Math.max(0, (usageStats.photosUsed / (currentPlan.limits.photos * currentPlan.limits.properties)) * 100 || 0))} 
                   className="h-2"
-                />
+                /> */}
               </div>
 
               <div>
@@ -114,10 +114,10 @@ export const PlanCard = ({ user }: PlanCardProps) => {
                   <span>Featured Listings</span>
                   <span>{usageStats.featuredListings} / 2</span>
                 </div>
-                <Progress 
-                  value={(usageStats.featuredListings / 2) * 100} 
+                {/* <Progress 
+                  value={Math.min(100, Math.max(0, (usageStats.featuredListings / 2) * 100 || 0))} 
                   className="h-2"
-                />
+                /> */}
               </div>
             </div>
           </div>
