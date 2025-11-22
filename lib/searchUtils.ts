@@ -13,14 +13,15 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
     // Decode the search string to handle URL-encoded characters
     const searchString = decodeURIComponent(params[0]);
     
-    // Extract location after "in-"
-    const locationMatch = searchString.match(/in-([^-]+(?:-[^-]+)*)/i);
+    // Extract location after "in-" - stop at the first non-word character or end of string
+    // This prevents capturing repeated patterns like "flatflatflat"
+    const locationMatch = searchString.match(/in-([a-zA-Z0-9\s]+?)(?:-[a-zA-Z0-9]+)?$/i);
     if (locationMatch) {
-      result.location = locationMatch[1].replace(/-/g, ' ');
+      result.location = locationMatch[1].replace(/-/g, ' ').trim();
     }
     
     // Extract property type from the beginning
-    const typeMatch = searchString.match(/^([^-]+)/);
+    const typeMatch = searchString.match(/^([a-z]+)/i);
     if (typeMatch) {
       const type = typeMatch[1].toLowerCase();
       if (type === 'room') result.propertyType = 'Room';
@@ -64,31 +65,53 @@ export function buildSearchUrl(filters: any): string {
     return '/search';
   }
   
+  // Validate and sanitize inputs
+  const sanitizeString = (str: string): string => {
+    if (!str || typeof str !== 'string') return '';
+    // Remove excessive repetition and limit length
+    return str
+      .replace(/\s+/g, '-')
+      .replace(/[^a-zA-Z0-9-]/g, '')
+      .replace(/(-)\1{2,}/g, '$1') // Replace 3+ consecutive dashes with single dash
+      .substring(0, 100); // Limit segment length
+  };
+  
   // Create URL segments without encoding here - let Next.js handle the encoding
   const segments = [];
   
   if (propertyType && location) {
-    const typeSlug = propertyType.toLowerCase();
-    const locationSlug = location.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-    segments.push(`${typeSlug}-for-rent-in-${locationSlug}`);
-    
-    // Add property type as a separate segment
-    segments.push(typeSlug);
+    const typeSlug = sanitizeString(propertyType.toLowerCase());
+    const locationSlug = sanitizeString(location);
+    if (typeSlug && locationSlug) {
+      segments.push(`${typeSlug}-for-rent-in-${locationSlug}`);
+      segments.push(typeSlug);
+    }
   } else if (location) {
-    const locationSlug = location.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-    segments.push(`properties-for-rent-in-${locationSlug}`);
+    const locationSlug = sanitizeString(location);
+    if (locationSlug) {
+      segments.push(`properties-for-rent-in-${locationSlug}`);
+    }
   } else if (propertyType) {
-    const typeSlug = propertyType.toLowerCase();
-    segments.push(`${typeSlug}-for-rent`);
-    segments.push(typeSlug);
+    const typeSlug = sanitizeString(propertyType.toLowerCase());
+    if (typeSlug) {
+      segments.push(`${typeSlug}-for-rent`);
+      segments.push(typeSlug);
+    }
   }
   
   // Add coordinates if available
   if (latitude && longitude) {
-    // Convert to string and remove any existing encoding
-    const lat = String(latitude).split('?')[0].split('&')[0];
-    const lng = String(longitude).split('?')[0].split('&')[0];
-    segments.push(lat, lng);
+    // Convert to string and validate as numbers
+    const lat = parseFloat(String(latitude));
+    const lng = parseFloat(String(longitude));
+    if (!isNaN(lat) && !isNaN(lng)) {
+      segments.push(lat.toString(), lng.toString());
+    }
+  }
+  
+  // Return search URL or default if no valid segments
+  if (segments.length === 0) {
+    return '/search';
   }
   
   // Join with slashes - Next.js will handle the proper URL encoding
