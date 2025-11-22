@@ -105,8 +105,8 @@ export const AdvancedSearchResults = () => {
   useEffect(() => {
     if (!isInitialized) return;
     if (isUpdatingUrl.current) return;
-    // Only update URL if at least location or propertyType is set
-    if (!debouncedFilters.location && !debouncedFilters.propertyType) return;
+    // Only update URL if location is set (location is required for meaningful search)
+    if (!debouncedFilters.location) return;
     
     // Build the new URL
     const searchUrl = buildSearchUrl(debouncedFilters);

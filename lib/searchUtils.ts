@@ -61,7 +61,8 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
 export function buildSearchUrl(filters: any): string {
   const { propertyType, location, latitude, longitude } = filters;
   
-  if (!propertyType && !location) {
+  // Location is required for a meaningful search URL
+  if (!location) {
     return '/search';
   }
   
@@ -90,12 +91,6 @@ export function buildSearchUrl(filters: any): string {
     const locationSlug = sanitizeString(location);
     if (locationSlug) {
       segments.push(`properties-for-rent-in-${locationSlug}`);
-    }
-  } else if (propertyType) {
-    const typeSlug = sanitizeString(propertyType.toLowerCase());
-    if (typeSlug) {
-      segments.push(`${typeSlug}-for-rent`);
-      segments.push(typeSlug);
     }
   }
   
