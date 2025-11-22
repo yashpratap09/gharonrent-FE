@@ -27,6 +27,8 @@ export function middleware(request: NextRequest) {
     '/profile',
     '/dashboard',
     '/pricing',
+    '/host-pricing',
+    '/tenant-pricing',
     '/privacy',
     '/terms',
     '/refund',

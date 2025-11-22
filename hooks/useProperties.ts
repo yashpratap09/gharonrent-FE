@@ -29,11 +29,11 @@ export const useProperties = (filters: PropertyFilters = {}, enabled = false) =>
   };
 
   // Get property by slug
-  const usePropertyBySlug = (slug: string) => {
+  const usePropertyBySlug = (slug: string, enabled: boolean = true) => {
     return useQuery({
       queryKey: ['property-slug', slug],
       queryFn: () => propertiesApi.getPropertyBySlug(slug),
-      enabled: !!slug,
+      enabled: !!slug && enabled,
       staleTime: 5 * 60 * 1000, // 5 minutes
     });
   };

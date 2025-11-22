@@ -66,8 +66,8 @@ export const Footer = () => {
               <Link href="/privacy" className="block text-muted-foreground hover:text-primary transition-colors">
                 Privacy
               </Link>
-              <Link href="/pricing" className="block text-muted-foreground hover:text-primary transition-colors">
-                Pricing
+              <Link href="/tenant-pricing" className="block text-muted-foreground hover:text-primary transition-colors">
+                Tenant Pricing
               </Link>
               <Link href="/refund" className="block text-muted-foreground hover:text-primary transition-colors">
                 Refund

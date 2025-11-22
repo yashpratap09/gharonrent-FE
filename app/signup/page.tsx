@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, User, Phone, Home } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 const signupSchema = z.object({
@@ -30,6 +30,8 @@ export default function Signup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signup, isSignupLoading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
   
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -45,9 +47,9 @@ export default function Signup() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push(returnUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, returnUrl]);
 
   const onSubmit = async (values: z.infer<typeof signupSchema>) => {
     signup(values);

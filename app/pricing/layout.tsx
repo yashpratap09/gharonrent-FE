@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Pricing Plans - RentHaven | Affordable Property Listing Solutions',
-  description: 'Choose the perfect plan for your rental business. Free basic plan available. Professional plans starting at ₹999/month with advanced features and priority support.',
-  keywords: 'renthaven pricing, property listing plans, rental platform cost, subscription plans, property management pricing',
+  title: 'Pricing Plans - RentHaven | Choose Your Plan',
+  description: 'Explore RentHaven pricing plans for both property owners (hosts) and tenants. Find the perfect plan for your needs.',
+  keywords: 'renthaven pricing, property owner plans, tenant plans, rental platform pricing, subscription plans',
   openGraph: {
     title: 'Pricing Plans - RentHaven',
-    description: 'Choose the perfect plan for your rental business. Free basic plan available.',
+    description: 'Explore RentHaven pricing plans for both property owners (hosts) and tenants.',
     url: '/pricing',
   },
   twitter: {
     title: 'Pricing Plans - RentHaven',
-    description: 'Choose the perfect plan for your rental business. Free basic plan available.',
+    description: 'Explore RentHaven pricing plans for both property owners (hosts) and tenants.',
   },
 };
 

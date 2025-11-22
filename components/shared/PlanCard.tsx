@@ -166,7 +166,7 @@ export const PlanCard = ({ user }: PlanCardProps) => {
               </div>
               
               <Button className="w-full" asChild>
-                <Link href="/pricing">
+                <Link href="/host-pricing">
                   Upgrade to Enterprise
                 </Link>
               </Button>

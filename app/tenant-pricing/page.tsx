@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -161,6 +161,33 @@ export default function TenantPricingPage() {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [razorpayReady, setRazorpayReady] = useState(false);
+
+  // Load Razorpay script dynamically
+  useEffect(() => {
+    const loadRazorpay = () => {
+      // Check if script already exists
+      if (document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) {
+        setRazorpayReady(true);
+        return;
+      }
+
+      // Create and append script
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        setRazorpayReady(true);
+        console.log('Razorpay script loaded successfully');
+      };
+      script.onerror = () => {
+        console.error('Failed to load Razorpay script');
+      };
+      document.body.appendChild(script);
+    };
+
+    loadRazorpay();
+  }, []);
 
   const handleSubscribe = async (packageName: string) => {
     console.log('Subscribe clicked for package:', packageName);
@@ -171,7 +198,7 @@ export default function TenantPricingPage() {
         description: "Please log in to subscribe to a package.",
         variant: "destructive"
       });
-      router.push('/login');
+      router.push('/login?returnUrl=/tenant-pricing');
       return;
     }
 
@@ -208,6 +235,16 @@ export default function TenantPricingPage() {
       
       const orderData = await tenantPaymentApi.createOrder({ packageName });
       console.log('Order data received:', orderData);
+      
+      // Wait for Razorpay to be available
+      if (!window.Razorpay) {
+        // If Razorpay is not available, wait a bit and try again
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      if (!window.Razorpay) {
+        throw new Error('Razorpay script failed to load. Please refresh the page and try again.');
+      }
       
       const options = {
         key: "rzp_test_RF7XfGz9LTnuym",
@@ -263,97 +300,127 @@ export default function TenantPricingPage() {
 
   return (
     <>
-      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 pt-20">
+      <div className="min-h-screen bg-background pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
-              Tenant Subscription Plans
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Choose the perfect plan to access detailed property information. 
-              View owner contacts, addresses, and more with our tenant packages.
-            </p>
-            <Badge variant="secondary" className="px-4 py-2 text-lg">
-              Start with 5 free property views
-            </Badge>
+        <section className="py-20 md:py-32 px-4 relative overflow-hidden">
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+            <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
           </div>
-        </section>
-
-        {/* Pricing Cards */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
-              {tenantPackages.map((pkg, index) => (
-                <Card 
-                  key={index} 
-                  className={`relative shadow-2xl border-0 bg-background/80 backdrop-blur-xl ${
-                    pkg.popular ? 'ring-2 ring-primary scale-105' : ''
-                  }`}
-                >
-                  {pkg.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-primary to-purple-600 text-white px-4 py-1">
-                        Most Popular
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <CardHeader className="text-center pb-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-3 mx-auto">
-                      <pkg.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-xl font-bold">{pkg.name}</CardTitle>
-                    <div className="mt-3">
-                      <span className="text-2xl font-bold">{pkg.price}</span>
-                      {pkg.price !== "Free" && (
-                        <span className="text-muted-foreground text-sm ml-1">/{pkg.period}</span>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      <div>{pkg.propertyViews}</div>
-                      <div>Valid for {pkg.duration}</div>
-                    </div>
-                    <p className="text-muted-foreground text-sm mt-2">{pkg.description}</p>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      {pkg.features.slice(0, 4).map((feature, featureIndex) => (
-                        <div key={featureIndex} className="flex items-start space-x-2">
-                          <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-xs">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    <Button 
-                      variant={pkg.buttonVariant}
-                      className={`w-full h-10 text-sm ${
-                        pkg.buttonVariant === 'default' 
-                          ? 'bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90' 
-                          : ''
-                      }`}
-                      onClick={() => handleSubscribe(pkg.name)}
-                      disabled={loading === pkg.name}
-                    >
-                      {loading === pkg.name ? (
-                        <>
-                          <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                          Processing...
-                        </>
-                      ) : (
-                        pkg.buttonText
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+          
+          <div className="container mx-auto text-center max-w-4xl relative z-10">
+            <div className="inline-block mb-4 md:mb-6">
+              <Badge className="bg-primary/20 text-primary hover:bg-primary/30 px-4 md:px-6 py-2 md:py-3 text-xs md:text-sm font-semibold rounded-full border border-primary/30">
+                🏠 Tenant Subscription Plans
+              </Badge>
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 md:mb-8 leading-tight tracking-tight">
+              <span className="bg-gradient-to-r from-primary via-purple-600 to-primary bg-clip-text text-transparent">
+                Find Your Perfect Home
+              </span>
+            </h1>
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 md:mb-12 leading-relaxed">
+              Unlock complete property details, connect with owners directly, and discover your ideal rental with confidence.
+            </p>
+            
+            {/* Benefits Pills */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-purple-600/10 border border-primary/20 rounded-full px-4 py-3 hover:border-primary/40 transition-all duration-300">
+                <span className="text-primary text-lg">✓</span>
+                <span className="text-xs md:text-sm font-medium">5 Free Views</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-purple-600/10 border border-primary/20 rounded-full px-4 py-3 hover:border-primary/40 transition-all duration-300">
+                <span className="text-primary text-lg">✓</span>
+                <span className="text-xs md:text-sm font-medium">No Card Needed</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 bg-gradient-to-br from-primary/10 to-purple-600/10 border border-primary/20 rounded-full px-4 py-3 hover:border-primary/40 transition-all duration-300">
+                <span className="text-primary text-lg">✓</span>
+                <span className="text-xs md:text-sm font-medium">Instant Access</span>
+              </div>
             </div>
           </div>
         </section>
+
+        {/* Pricing Cards Section */}
+      <section className="py-20 px-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900">
+  <div className="max-w-7xl mx-auto text-center mb-16">
+    <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+      Choose Your <span className="text-primary">Perfect Plan</span>
+    </h2>
+    <p className="text-muted-foreground mt-4 text-lg max-w-2xl mx-auto">
+      Access verified properties, owner contact details, and advanced search tools.
+    </p>
+  </div>
+
+  {/* Cards */}
+  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    {tenantPackages.map((pkg, i) => (
+      <div
+        key={i}
+        className={`relative group rounded-3xl p-[1px] transition-all duration-500 ${
+          pkg.popular
+            ? "bg-gradient-to-br from-primary to-purple-600 shadow-xl scale-105"
+            : "bg-gradient-to-br from-slate-200/40 to-transparent shadow-sm hover:shadow-lg"
+        }`}
+      >
+        <div className="rounded-3xl bg-white dark:bg-slate-900 p-6 h-full flex flex-col backdrop-blur-md">
+          
+          {/* Popular Badge */}
+          {pkg.popular && (
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-xs font-semibold shadow-md">
+              Most Popular
+            </span>
+          )}
+
+          {/* Icon */}
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 mx-auto ${
+            pkg.popular
+              ? "bg-white/20 text-white"
+              : "bg-primary/10 text-primary group-hover:bg-primary/20"
+          }`}>
+            <pkg.icon className="w-7 h-7" />
+          </div>
+
+          {/* Title */}
+          <h3 className="text-2xl font-bold">{pkg.name}</h3>
+
+          {/* Price */}
+          <p className="mt-4 mb-6">
+            <span className="text-4xl font-black text-primary">{pkg.price}</span>
+            {pkg.price !== "Free" && (
+              <span className="text-sm text-muted-foreground ml-1">/{pkg.period}</span>
+            )}
+          </p>
+
+          {/* Features */}
+          <div className="flex-grow space-y-3 text-left">
+            {pkg.features.slice(0, 5).map((f, idx) => (
+              <p key={idx} className="flex items-center gap-2 text-sm">
+                <Check className="w-4 h-4 text-green-500" /> {f}
+              </p>
+            ))}
+          </div>
+
+          {/* Button */}
+          <Button
+            className={`mt-8 w-full rounded-xl h-12 text-base font-semibold ${
+              pkg.popular
+                ? "bg-white text-primary hover:bg-white/90"
+                : "bg-primary/90 text-white hover:bg-primary"
+            }`}
+            disabled={loading === pkg.name}
+            onClick={() => handleSubscribe(pkg.name)}
+          >
+            {loading === pkg.name ? "Processing..." : pkg.buttonText}
+          </Button>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
 
         {/* Features Comparison */}
         <section className="py-16 px-4 bg-muted/30">

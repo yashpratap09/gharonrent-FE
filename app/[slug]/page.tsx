@@ -2,7 +2,6 @@
 
 export const runtime = 'edge';
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -12,18 +11,56 @@ import { Button } from "@/components/ui/button";
 import PropertyDetails from "./PropertyDetails";
 import { Toaster } from "@/components/ui/toaster";
 import { useProperties } from "@/hooks/useProperties";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, LogIn } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PropertyPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const { isAuthenticated } = useAuth();
   const {usePropertyBySlug } = useProperties();
-  const { data, isLoading, isError } = usePropertyBySlug(slug);
+  // Only call API if user is authenticated
+  const { data, isLoading, isError } = usePropertyBySlug(slug, isAuthenticated);
 
   // Extract property and subscription from the response
   const property = data?.property;
   const subscription = data?.subscription;
+
+  // Check if user is not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="pt-20 p-6">
+          <div className="max-w-4xl mx-auto text-center py-20">
+            <div className="flex justify-center mb-8">
+              <div className="p-4 rounded-full bg-primary/10">
+                <LogIn className="h-16 w-16 text-primary" />
+              </div>
+            </div>
+            <h1 className="text-4xl font-bold mb-4 text-foreground">Login Required</h1>
+            <p className="text-muted-foreground mb-2 text-lg">
+              Please login to view property details, images, and more information.
+            </p>
+            <p className="text-muted-foreground mb-10">
+              Create an account if you don&apos;t have one yet.
+            </p>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <Button asChild size="lg" className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90">
+                <Link href={`/login?returnUrl=/${slug}`}>Login</Link>
+              </Button>
+              <Button variant="secondary" asChild size="lg">
+                <Link href={`/signup?returnUrl=/${slug}`}>Sign Up</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+        <Toaster />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

@@ -5,6 +5,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const getImageUrl = (url:string)=>{
-  return process.env.NEXT_PUBLIC_API_URL + url
-}
+export const getImageUrl = (url: string) => {
+  // If URL contains "fallback", return no_image.png
+  if (url.includes('fallback')) {
+    return `${process.env.NEXT_PUBLIC_API_URL}/images/no_image.png`;
+  }
+  return process.env.NEXT_PUBLIC_API_URL + url;
+};

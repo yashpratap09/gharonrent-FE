@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, Home } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 const loginSchema = z.object({
@@ -23,6 +23,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoginLoading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') || '/';
   
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -35,9 +37,9 @@ export default function Login() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push(returnUrl);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, returnUrl]);
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     login(values);

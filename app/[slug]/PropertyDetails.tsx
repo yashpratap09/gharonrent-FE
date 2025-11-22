@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -38,6 +39,7 @@ import {
   CheckCircle,
   XCircle,
   Lock,
+  ArrowLeft,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
@@ -61,11 +63,22 @@ interface SubscriptionInfo {
 }
 
 const PropertyDetails = ({ property, subscription }: PropertyDetailsProps) => {
+  const router = useRouter();
   const { toast } = useToast();
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toggleFavorite, isTogglingFavorite } = useProperties();
   const recentlyViewedRef = useRef(false);
+
+  const handleBackClick = () => {
+    // Try to go back in browser history
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      // Fallback to search page if no history
+      router.push("/search");
+    }
+  };
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -157,9 +170,15 @@ const PropertyDetails = ({ property, subscription }: PropertyDetailsProps) => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Action Buttons */}
         <div className="flex justify-between items-center">
-          <Link href="/search" className="text-muted-foreground hover:text-primary transition-colors">
-            ← Back to Search
-          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackClick}
+            className="text-muted-foreground hover:text-primary transition-colors gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <div className="flex gap-2">
             <Button
               variant="outline"
