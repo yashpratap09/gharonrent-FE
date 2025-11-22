@@ -13,9 +13,9 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
     // Decode the search string to handle URL-encoded characters
     const searchString = decodeURIComponent(params[0]);
     
-    // Extract location after "in-" - stop at the first non-word character or end of string
-    // This prevents capturing repeated patterns like "flatflatflat"
-    const locationMatch = searchString.match(/in-([a-zA-Z0-9\s]+?)(?:-[a-zA-Z0-9]+)?$/i);
+    // Extract location after "in-" - match everything after "in-" until end of string
+    // The location is the last part before the next URL segment
+    const locationMatch = searchString.match(/in-([a-zA-Z0-9\s-]+)$/i);
     if (locationMatch) {
       result.location = locationMatch[1].replace(/-/g, ' ').trim();
     }
