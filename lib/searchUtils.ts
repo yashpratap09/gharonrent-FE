@@ -15,8 +15,10 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
     
     // Extract location after "in-" - match everything after "in-" until end of string
     // The location is the last part before the next URL segment
-    const locationMatch = searchString.match(/in-([a-zA-Z0-9\s-]+)$/i);
+    // Match: in-[location] where location can have letters, numbers, and hyphens
+    const locationMatch = searchString.match(/in-([a-zA-Z0-9-]+)$/i);
     if (locationMatch) {
+      // Replace hyphens with spaces and trim
       result.location = locationMatch[1].replace(/-/g, ' ').trim();
     }
     
