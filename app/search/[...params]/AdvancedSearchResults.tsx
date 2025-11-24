@@ -126,14 +126,14 @@ export const AdvancedSearchResults = () => {
     
     console.log('✅ Location is set, proceeding with URL update');
     
-    // Build the new URL
+    // Build the new URL - this now preserves latitude/longitude
     const searchUrl = buildSearchUrl(debouncedFilters);
     console.log('  searchUrl:', searchUrl);
     
     const queryParams = new URLSearchParams();
     
     // Exclude URL path parameters from query string to prevent double-encoding
-    const pathParams = ['propertyType', 'location', 'latitude', 'longitude'];
+    const pathParams = ['propertyType', 'location', 'latitude', 'longitude', 'page', 'limit'];
     
     Object.entries(debouncedFilters).forEach(([key, value]) => {
       // Skip path parameters - they're already in the URL path

@@ -8,12 +8,13 @@ export interface SearchUrlParams {
 // Parse search URL like: search/Room-for-rent-in-Chandigarh-India/room/30.7333148/76.7794179
 export function parseSearchUrl(params: string[]): SearchUrlParams {
   const result: SearchUrlParams = {};
+  let searchString = '';
   
   console.log('🔍 parseSearchUrl called with params:', params);
   
   if (params.length >= 1) {
     // Decode the search string to handle URL-encoded characters
-    const searchString = decodeURIComponent(params[0]);
+    searchString = decodeURIComponent(params[0]);
     console.log('  searchString:', searchString);
     
     // Extract location after "in-" - match everything after "in-" until next slash or end
@@ -54,20 +55,35 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
     else if (typeParam === 'commercial') result.propertyType = 'Commercial';
   }
   
+  // Extract latitude and longitude from the search string if they exist
+  // Format: type-for-rent-in-location/type/latitude/longitude
+  if (searchString) {
+    const coordMatch = searchString.match(/\/(\d+\.\d+)\/(\d+\.\d+)$/);
+    if (coordMatch) {
+      const lat = parseFloat(coordMatch[1]);
+      const lng = parseFloat(coordMatch[2]);
+      if (!isNaN(lat)) result.latitude = lat;
+      if (!isNaN(lng)) result.longitude = lng;
+      console.log('  latitude:', result.latitude);
+      console.log('  longitude:', result.longitude);
+    }
+  }
+  
+  // Also check params array for backward compatibility
   if (params.length >= 3) {
     // Latitude - decode and parse
     const latParam = decodeURIComponent(params[2]);
     const lat = parseFloat(latParam);
-    if (!isNaN(lat)) result.latitude = lat;
-    console.log('  latitude:', result.latitude);
+    if (!isNaN(lat) && !result.latitude) result.latitude = lat;
+    console.log('  latitude (from params[2]):', result.latitude);
   }
   
   if (params.length >= 4) {
     // Longitude - decode and parse
     const lngParam = decodeURIComponent(params[3]);
     const lng = parseFloat(lngParam);
-    if (!isNaN(lng)) result.longitude = lng;
-    console.log('  longitude:', result.longitude);
+    if (!isNaN(lng) && !result.longitude) result.longitude = lng;
+    console.log('  longitude (from params[3]):', result.longitude);
   }
   
   console.log('  final result:', result);
@@ -111,8 +127,8 @@ export function buildSearchUrl(filters: any): string {
     }
   }
   
-  // Add coordinates if available
-  if (latitude && longitude) {
+  // Add coordinates if available - ALWAYS preserve them if they exist
+  if (latitude !== null && latitude !== undefined && longitude !== null && longitude !== undefined) {
     // Convert to string and validate as numbers
     const lat = parseFloat(String(latitude));
     const lng = parseFloat(String(longitude));
