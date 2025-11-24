@@ -9,33 +9,45 @@ export interface SearchUrlParams {
 export function parseSearchUrl(params: string[]): SearchUrlParams {
   const result: SearchUrlParams = {};
   
+  console.log('🔍 parseSearchUrl called with params:', params);
+  
   if (params.length >= 1) {
     // Decode the search string to handle URL-encoded characters
     const searchString = decodeURIComponent(params[0]);
+    console.log('  searchString:', searchString);
     
     // Extract location after "in-" - match everything after "in-" until end of string
     // The location is the last part before the next URL segment
     // Match: in-[location] where location can have letters, numbers, and hyphens
     const locationMatch = searchString.match(/in-([a-zA-Z0-9-]+)$/i);
+    console.log('  locationMatch:', locationMatch);
+    
     if (locationMatch) {
       // Replace hyphens with spaces and trim
       result.location = locationMatch[1].replace(/-/g, ' ').trim();
+      console.log('  extracted location:', result.location);
+    } else {
+      console.log('  ⚠️ NO LOCATION MATCH FOUND');
     }
     
     // Extract property type from the beginning
     const typeMatch = searchString.match(/^([a-z]+)/i);
+    console.log('  typeMatch:', typeMatch);
+    
     if (typeMatch) {
       const type = typeMatch[1].toLowerCase();
       if (type === 'room') result.propertyType = 'Room';
       else if (type === 'flat' || type === 'apartment') result.propertyType = 'Flat';
       else if (type === 'pg') result.propertyType = 'PG';
       else if (type === 'commercial') result.propertyType = 'Commercial';
+      console.log('  extracted propertyType:', result.propertyType);
     }
   }
   
   if (params.length >= 2) {
     // Property type confirmation - decode to handle URL encoding
     const typeParam = decodeURIComponent(params[1]).toLowerCase();
+    console.log('  typeParam (from params[1]):', typeParam);
     if (typeParam === 'room') result.propertyType = 'Room';
     else if (typeParam === 'flat' || typeParam === 'apartment') result.propertyType = 'Flat';
     else if (typeParam === 'pg') result.propertyType = 'PG';
@@ -47,6 +59,7 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
     const latParam = decodeURIComponent(params[2]);
     const lat = parseFloat(latParam);
     if (!isNaN(lat)) result.latitude = lat;
+    console.log('  latitude:', result.latitude);
   }
   
   if (params.length >= 4) {
@@ -54,8 +67,10 @@ export function parseSearchUrl(params: string[]): SearchUrlParams {
     const lngParam = decodeURIComponent(params[3]);
     const lng = parseFloat(lngParam);
     if (!isNaN(lng)) result.longitude = lng;
+    console.log('  longitude:', result.longitude);
   }
   
+  console.log('  final result:', result);
   return result;
 }
 

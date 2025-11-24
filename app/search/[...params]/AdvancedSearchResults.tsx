@@ -96,6 +96,12 @@ export const AdvancedSearchResults = () => {
   useEffect(() => {
     if (!isInitialized) {
       const initialFilters = { ...defaultFilters, ...parsedUrlFilters, ...queryFilters };
+      console.log('🔍 FILTER INITIALIZATION DEBUG:');
+      console.log('  params.params:', params.params);
+      console.log('  parsedUrlFilters:', parsedUrlFilters);
+      console.log('  queryFilters:', queryFilters);
+      console.log('  initialFilters:', initialFilters);
+      console.log('  location from URL:', parsedUrlFilters.location);
       setFilters(initialFilters);
       setIsInitialized(true);
     }
@@ -105,11 +111,25 @@ export const AdvancedSearchResults = () => {
   useEffect(() => {
     if (!isInitialized) return;
     if (isUpdatingUrl.current) return;
+    
+    console.log('🔄 URL UPDATE EFFECT TRIGGERED:');
+    console.log('  debouncedFilters:', debouncedFilters);
+    console.log('  debouncedFilters.location:', debouncedFilters.location);
+    console.log('  debouncedFilters.location type:', typeof debouncedFilters.location);
+    console.log('  debouncedFilters.location isEmpty:', !debouncedFilters.location);
+    
     // Only update URL if location is set (location is required for meaningful search)
-    if (!debouncedFilters.location) return;
+    if (!debouncedFilters.location) {
+      console.log('⚠️ SKIPPING URL UPDATE: location is not set');
+      return;
+    }
+    
+    console.log('✅ Location is set, proceeding with URL update');
     
     // Build the new URL
     const searchUrl = buildSearchUrl(debouncedFilters);
+    console.log('  searchUrl:', searchUrl);
+    
     const queryParams = new URLSearchParams();
     
     // Exclude URL path parameters from query string to prevent double-encoding
@@ -127,13 +147,19 @@ export const AdvancedSearchResults = () => {
     const queryString = queryParams.toString();
     const fullUrl = queryString ? `${searchUrl}?${queryString}` : searchUrl;
     
+    console.log('  fullUrl:', fullUrl);
+    
     // Get current URL path + query
     const currentPath = window.location.pathname;
     const currentQuery = window.location.search;
     const currentFullUrl = `${currentPath}${currentQuery}`;
     
+    console.log('  currentFullUrl:', currentFullUrl);
+    console.log('  URLs match:', currentFullUrl === fullUrl);
+    
     // Only update URL if it's different from the current one
     if (currentFullUrl !== fullUrl) {
+      console.log('📍 UPDATING URL to:', fullUrl);
       isUpdatingUrl.current = true;
       router.replace(fullUrl, { scroll: false });
       setTimeout(() => {
